@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import Input from '@/components/input/input';
+import Input from '@/components/input/Input';
 
 interface HeadingProps {
   headingText?: string | null;

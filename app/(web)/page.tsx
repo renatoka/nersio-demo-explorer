@@ -11,7 +11,8 @@ import TabSwitcher, {
   ANIMAL_DETAIL_TABS,
 } from '@/components/switcher/TabSwitcher';
 import AnimalChip from '@/components/chip/Chip';
-import Heading from '@/components/ui/heading/heading';
+import Heading from '@/components/ui/heading/Heading';
+import { LoadingState } from '@/components/loader/Loader';
 
 export default function Home() {
   const [sideBarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -28,7 +29,11 @@ export default function Home() {
     useState<SwitcherType>('prey');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const { data: queryData } = useQuery({
+  const {
+    data: queryData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['animals'],
     queryFn: async () => {
       const response = await fetch('/api/animals');
@@ -115,6 +120,30 @@ export default function Home() {
       )
     : [];
 
+  if (isError) {
+    return (
+      <div className="h-screen overflow-hidden p-2">
+        <div className="flex h-full w-full flex-col overflow-hidden">
+          <div className="flex-shrink-0">
+            <Heading headingText="Animal Finder" />
+          </div>
+          <div className="flex min-h-0 w-full flex-1 rounded-b-lg border-[1px] border-b border-neutral-300 bg-[#fbfbfb] p-3 sm:p-6">
+            <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+              <div className="text-center">
+                <h2 className="mb-2 text-lg font-semibold text-neutral-900">
+                  Something went wrong
+                </h2>
+                <p className="text-sm text-neutral-600">
+                  Failed to load animals. Please try refreshing the page.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen overflow-hidden p-2">
       <div
@@ -126,38 +155,42 @@ export default function Home() {
           <div className="flex-shrink-0">
             <Heading
               headingText="Animal Finder"
-              searchable={true}
+              searchable={!isLoading}
               onSearchChange={handleSearchChange}
             />
           </div>
           <div className="flex min-h-0 w-full flex-1 rounded-b-lg border-[1px] border-b border-neutral-300 bg-[#fbfbfb] p-3 sm:p-6">
-            <div
-              className="grid w-full grid-cols-1 content-start items-start gap-3 overflow-y-auto overscroll-contain sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
-              onScroll={handleScroll}
-            >
-              {visibleAnimals.map((animal) => (
-                <AnimalCard
-                  key={animal.id}
-                  animal={animal}
-                  handleAnimalClick={handleAnimalClick}
-                />
-              ))}
-              {visibleCount < filteredAnimals.length && (
-                <div className="col-span-full flex justify-center py-4">
-                  <div className="text-center text-sm">
-                    Loading more animals... ({visibleCount} of{' '}
-                    {filteredAnimals.length})
+            {isLoading ? (
+              <LoadingState message="Loading animals..." />
+            ) : (
+              <div
+                className="grid w-full grid-cols-1 content-start items-start gap-3 overflow-y-auto overscroll-contain sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
+                onScroll={handleScroll}
+              >
+                {visibleAnimals.map((animal) => (
+                  <AnimalCard
+                    key={animal.id}
+                    animal={animal}
+                    handleAnimalClick={handleAnimalClick}
+                  />
+                ))}
+                {visibleCount < filteredAnimals.length && (
+                  <div className="col-span-full flex justify-center py-4">
+                    <div className="text-center text-sm">
+                      Loading more animals... ({visibleCount} of{' '}
+                      {filteredAnimals.length})
+                    </div>
                   </div>
-                </div>
-              )}
-              {searchQuery && filteredAnimals.length === 0 && (
-                <div className="col-span-full flex justify-center py-8">
-                  <div className="px-4 text-center text-neutral-600">
-                    No animals found matching "{searchQuery}"
+                )}
+                {searchQuery && filteredAnimals.length === 0 && (
+                  <div className="col-span-full flex justify-center py-8">
+                    <div className="px-4 text-center text-neutral-600">
+                      No animals found matching "{searchQuery}"
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
