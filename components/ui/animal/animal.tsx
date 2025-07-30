@@ -3,15 +3,15 @@ import { Animal } from '@/types/animal';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-interface AnimalInfoProps {
+interface AnimalCardProps {
   animal: Animal;
   handleAnimalClick: (animal: Animal) => void;
 }
 
-export default function AnimalInfo({
+export default function AnimalCard({
   animal,
   handleAnimalClick,
-}: AnimalInfoProps) {
+}: AnimalCardProps) {
   return (
     <div className="flex flex-col p-4 bg-white rounded-lg border-b border-[1px] border-neutral-200 h-fit">
       <div className="flex items-center justify-between">

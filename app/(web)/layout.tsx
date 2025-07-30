@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} antialiased`}>
         <QueryClientProvider client={queryClient}>
-          <div className="p-2">{children}</div>
+          {children}
         </QueryClientProvider>
       </body>
     </html>

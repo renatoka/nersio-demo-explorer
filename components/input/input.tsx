@@ -15,7 +15,7 @@ export default function Input({
   onChange,
 }: InputProps) {
   return (
-    <div className="relative h-9 rounded-lg bg-neutral-100">
+    <div className="relative h-9 w-full rounded-lg bg-neutral-100">
       <input
         className={
           'h-full w-full rounded-lg border-0 bg-transparent pr-10 pl-3 font-medium text-neutral-500 focus:outline-none ' +
