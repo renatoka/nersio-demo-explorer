@@ -132,7 +132,7 @@ export default function Home() {
           </div>
           <div className="flex min-h-0 w-full flex-1 rounded-b-lg border-[1px] border-b border-neutral-300 bg-[#fbfbfb] p-3 sm:p-6">
             <div
-              className="grid w-full grid-cols-1 gap-3 overflow-y-auto overscroll-contain sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
+              className="grid w-full grid-cols-1 content-start items-start gap-3 overflow-y-auto overscroll-contain sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
               onScroll={handleScroll}
             >
               {visibleAnimals.map((animal) => (
