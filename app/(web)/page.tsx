@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Animal } from '@/types/animal';
 import { useQuery } from '@tanstack/react-query';
-import AnimalInfo from '@/components/ui/animal/animal';
+import { Animal } from '@/types/animal';
+import AnimalCard from '@/components/ui/animal/AnimalCard';
+import { getRelatedAnimals, getEmptyMessage } from '@/utils/animal';
+import { SwitcherType } from '@/types/common';
+import AnimalList from '@/components/list/AnimalList';
+import TabSwitcher, {
+  ANIMAL_DETAIL_TABS,
+} from '@/components/switcher/TabSwitcher';
+import AnimalChip from '@/components/chip/Chip';
 import Heading from '@/components/ui/heading/heading';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faTriangleExclamation,
-  faUtensils,
-} from '@fortawesome/free-solid-svg-icons';
-import AnimalChip from '@/components/chip/chip';
 
 export default function Home() {
   const [sideBarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -23,9 +24,8 @@ export default function Home() {
   });
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(50);
-  const [selectedAnimalSwitcherType, setSelectedAnimalSwitcherType] = useState<
-    'prey' | 'predators'
-  >('prey');
+  const [selectedAnimalSwitcherType, setSelectedAnimalSwitcherType] =
+    useState<SwitcherType>('prey');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const { data: queryData } = useQuery({
@@ -48,6 +48,10 @@ export default function Home() {
     }
   }, [queryData]);
 
+  /*
+   * Scroll to top on initial load
+   * This ensures the user always starts at the top of the list
+   */
   useEffect(() => {
     window.scrollTo(0, 0);
     const scrollContainer = document.querySelector('.overflow-y-scroll');
@@ -103,6 +107,14 @@ export default function Home() {
 
   const visibleAnimals = filteredAnimals.slice(0, visibleCount);
 
+  const relatedAnimals = selectedAnimal
+    ? getRelatedAnimals(
+        selectedAnimal,
+        data.animals,
+        selectedAnimalSwitcherType
+      )
+    : [];
+
   return (
     <div className="h-screen overflow-hidden p-2">
       <div
@@ -124,7 +136,7 @@ export default function Home() {
               onScroll={handleScroll}
             >
               {visibleAnimals.map((animal) => (
-                <AnimalInfo
+                <AnimalCard
                   key={animal.id}
                   animal={animal}
                   handleAnimalClick={handleAnimalClick}
@@ -149,13 +161,12 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Desktop Sidebar */}
         {sideBarOpen && selectedAnimal !== null && (
           <div className="hidden w-full max-w-80 flex-col overflow-hidden md:flex">
             <div className="flex-shrink-0">
               <Heading
-                headingText={
-                  selectedAnimal ? selectedAnimal.name : 'Animal Details'
-                }
+                headingText={selectedAnimal.name}
                 searchable={false}
                 closable={true}
                 onClose={handleClose}
@@ -177,80 +188,21 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-hidden p-4">
-                <div className="flex h-9 w-full flex-shrink-0 gap-2 rounded-md bg-neutral-100 p-1">
-                  <div
-                    className={`${
-                      selectedAnimalSwitcherType === 'prey'
-                        ? 'bg-white'
-                        : 'bg-neutral-100'
-                    } flex h-7 w-full cursor-pointer items-center justify-center gap-1.5 rounded-sm px-[6px] py-[10px]`}
-                    onClick={() => setSelectedAnimalSwitcherType('prey')}
-                  >
-                    <FontAwesomeIcon
-                      icon={faUtensils}
-                      className="h-4 w-[13px]"
-                    />
-                    <p className="text-sm font-medium">Prey</p>
-                  </div>
-                  <div
-                    className={`${
-                      selectedAnimalSwitcherType === 'predators'
-                        ? 'bg-white'
-                        : 'bg-neutral-100'
-                    } flex h-7 w-full cursor-pointer items-center justify-center gap-1.5 rounded-sm px-[6px] py-[10px]`}
-                    onClick={() => setSelectedAnimalSwitcherType('predators')}
-                  >
-                    <FontAwesomeIcon
-                      icon={faTriangleExclamation}
-                      className="h-4 w-[13px]"
-                    />
-                    <p className="text-sm font-medium">Predators</p>
-                  </div>
+                <div className="flex-shrink-0">
+                  <TabSwitcher
+                    tabs={ANIMAL_DETAIL_TABS}
+                    activeTab={selectedAnimalSwitcherType}
+                    onTabChange={(tab) =>
+                      setSelectedAnimalSwitcherType(tab as 'prey' | 'predators')
+                    }
+                  />
                 </div>
                 <div className="min-h-0 w-full flex-1 overflow-y-auto overscroll-contain">
-                  <div className="flex flex-col gap-2">
-                    {selectedAnimalSwitcherType === 'prey' ? (
-                      selectedAnimal.prey.length > 0 ? (
-                        selectedAnimal.prey.map((preyId) => {
-                          const preyAnimal = data.animals.find(
-                            (animal) => animal.id === preyId
-                          );
-                          return (
-                            preyAnimal && (
-                              <AnimalChip
-                                key={preyAnimal.id}
-                                animal={preyAnimal}
-                                onClick={setSelectedAnimal}
-                              />
-                            )
-                          );
-                        })
-                      ) : (
-                        <div className="text-sm text-neutral-600">
-                          No prey found for this animal.
-                        </div>
-                      )
-                    ) : selectedAnimal.predators.length > 0 ? (
-                      selectedAnimal.predators.map((predatorId) => {
-                        const predatorAnimal = data.animals.find(
-                          (animal) => animal.id === predatorId
-                        );
-                        return (
-                          predatorAnimal && (
-                            <AnimalChip
-                              key={predatorAnimal.id}
-                              animal={predatorAnimal}
-                              onClick={setSelectedAnimal}
-                            />
-                          )
-                        );
-                      })
-                    ) : (
-                      <div className="text-sm text-neutral-600">
-                        No predators found for this animal.
-                      </div>
-                    )}
-                  </div>
+                  <AnimalList
+                    animals={relatedAnimals}
+                    onAnimalClick={setSelectedAnimal}
+                    emptyMessage={getEmptyMessage(selectedAnimalSwitcherType)}
+                  />
                 </div>
               </div>
             </div>
@@ -258,6 +210,7 @@ export default function Home() {
         )}
       </div>
 
+      {/* Mobile Sidebar */}
       {sideBarOpen && selectedAnimal !== null && (
         <div className="md:hidden">
           <div
@@ -265,12 +218,10 @@ export default function Home() {
             onClick={handleClose}
           />
 
-          <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[90vh] flex-col overflow-hidden">
+          <div className="fixed inset-x-0 bottom-0 z-50 flex h-full max-h-[90vh] flex-col overflow-hidden">
             <div className="flex-shrink-0 bg-white px-4 pb-2">
               <Heading
-                headingText={
-                  selectedAnimal ? selectedAnimal.name : 'Animal Details'
-                }
+                headingText={selectedAnimal.name}
                 searchable={false}
                 closable={true}
                 onClose={handleClose}
@@ -297,89 +248,33 @@ export default function Home() {
 
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4">
                 <div className="mb-3 flex-shrink-0">
-                  <div className="flex h-10 w-full gap-2 rounded-md bg-neutral-100 p-1 sm:h-9">
-                    <button
-                      className={`${
-                        selectedAnimalSwitcherType === 'prey'
-                          ? 'bg-white'
-                          : 'bg-neutral-100'
-                      } flex h-8 w-full items-center justify-center gap-1.5 rounded-sm px-2 py-2 sm:h-7`}
-                      onClick={() => setSelectedAnimalSwitcherType('prey')}
-                    >
-                      <FontAwesomeIcon
-                        icon={faUtensils}
-                        className="h-3 w-3 sm:h-4 sm:w-[13px]"
-                      />
-                      <p className="text-xs font-medium sm:text-sm">Prey</p>
-                    </button>
-                    <button
-                      className={`${
-                        selectedAnimalSwitcherType === 'predators'
-                          ? 'bg-white'
-                          : 'bg-neutral-100'
-                      } flex h-8 w-full items-center justify-center gap-1.5 rounded-sm px-2 py-2 sm:h-7`}
-                      onClick={() => setSelectedAnimalSwitcherType('predators')}
-                    >
-                      <FontAwesomeIcon
-                        icon={faTriangleExclamation}
-                        className="h-3 w-3 sm:h-4 sm:w-[13px]"
-                      />
-                      <p className="text-xs font-medium sm:text-sm">
-                        Predators
-                      </p>
-                    </button>
-                  </div>
+                  <TabSwitcher
+                    tabs={ANIMAL_DETAIL_TABS}
+                    activeTab={selectedAnimalSwitcherType}
+                    onTabChange={(tab) =>
+                      setSelectedAnimalSwitcherType(tab as 'prey' | 'predators')
+                    }
+                    className="flex h-10 w-full gap-2 rounded-md bg-neutral-100 p-1 sm:h-9"
+                  />
                 </div>
 
                 <div className="-mx-4 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4">
                   <div className="flex flex-col gap-2 pb-4">
-                    {selectedAnimalSwitcherType === 'prey' ? (
-                      selectedAnimal.prey.length > 0 ? (
-                        selectedAnimal.prey.map((preyId) => {
-                          const preyAnimal = data.animals.find(
-                            (animal) => animal.id === preyId
-                          );
-                          return (
-                            preyAnimal && (
-                              <div
-                                key={preyAnimal.id}
-                                className="rounded-lg active:bg-neutral-100"
-                              >
-                                <AnimalChip
-                                  animal={preyAnimal}
-                                  onClick={setSelectedAnimal}
-                                />
-                              </div>
-                            )
-                          );
-                        })
-                      ) : (
-                        <div className="py-8 text-center text-sm text-neutral-600">
-                          No prey found for this animal.
+                    {relatedAnimals.length > 0 ? (
+                      relatedAnimals.map((animal) => (
+                        <div
+                          key={animal.id}
+                          className="rounded-lg active:bg-neutral-100"
+                        >
+                          <AnimalChip
+                            animal={animal}
+                            onClick={setSelectedAnimal}
+                          />
                         </div>
-                      )
-                    ) : selectedAnimal.predators.length > 0 ? (
-                      selectedAnimal.predators.map((predatorId) => {
-                        const predatorAnimal = data.animals.find(
-                          (animal) => animal.id === predatorId
-                        );
-                        return (
-                          predatorAnimal && (
-                            <div
-                              key={predatorAnimal.id}
-                              className="rounded-lg active:bg-neutral-100"
-                            >
-                              <AnimalChip
-                                animal={predatorAnimal}
-                                onClick={setSelectedAnimal}
-                              />
-                            </div>
-                          )
-                        );
-                      })
+                      ))
                     ) : (
                       <div className="py-8 text-center text-sm text-neutral-600">
-                        No predators found for this animal.
+                        {getEmptyMessage(selectedAnimalSwitcherType)}
                       </div>
                     )}
                   </div>

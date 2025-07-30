@@ -13,11 +13,11 @@ export default function AnimalCard({
   handleAnimalClick,
 }: AnimalCardProps) {
   return (
-    <div className="flex flex-col p-4 bg-white rounded-lg border-b border-[1px] border-neutral-200 h-fit">
+    <div className="flex h-fit flex-col rounded-lg border-[1px] border-b border-neutral-200 bg-white p-4">
       <div className="flex items-center justify-between">
-        <div className="flex justify-start items-start gap-2">
+        <div className="flex items-start justify-start gap-2">
           <div
-            className="w-9 h-9 rounded-full"
+            className="h-9 w-9 rounded-full"
             style={{ backgroundColor: animal.color }}
           ></div>
           <div>
@@ -28,13 +28,13 @@ export default function AnimalCard({
           </div>
         </div>
         <div
-          className="w-9 h-9 bg-neutral-50 rounded-lg p-2 hover:cursor-pointer"
+          className="h-9 w-9 rounded-lg bg-neutral-50 p-2 hover:cursor-pointer"
           onClick={() => handleAnimalClick(animal)}
         >
           <FontAwesomeIcon icon={faInfoCircle} />
         </div>
       </div>
-      <div className="border-t border-neutral-200 my-2" />
+      <div className="my-2 border-t border-neutral-200" />
       <div className="flex flex-col">
         <div className="flex flex-col items-center justify-between gap-2">
           {Object.entries(animal).map(
@@ -45,12 +45,12 @@ export default function AnimalCard({
               key !== 'species' && (
                 <div
                   key={key}
-                  className="flex items-center justify-between w-full"
+                  className="flex w-full items-center justify-between"
                 >
                   <span className="text-xs font-normal text-neutral-700 capitalize">
                     {key + '\u00A0'}
                   </span>
-                  <span className="flex-1 mt-3 border-b border-dashed border-neutral-300"></span>
+                  <span className="mt-3 flex-1 border-b border-dashed border-neutral-300"></span>
                   <span className="text-xs font-normal text-neutral-500 capitalize">
                     {'\u00A0'}
                     {Array.isArray(value) ? value.length : value}

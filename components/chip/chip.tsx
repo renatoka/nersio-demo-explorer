@@ -6,18 +6,15 @@ interface AnimalChipProps {
   onClick: (animal: Animal) => void;
 }
 
-export default function AnimalChip({
-  animal,
-  onClick,
-}: AnimalChipProps) {
+export default function AnimalChip({ animal, onClick }: AnimalChipProps) {
   return (
     <div
       key={animal.id}
-      className="flex justify-start items-center gap-2 hover:bg-neutral-100 hover:cursor-pointer hover:rounded-lg p-2"
+      className="flex items-center justify-start gap-2 p-2 hover:cursor-pointer hover:rounded-lg hover:bg-neutral-100"
       onClick={() => onClick(animal)}
     >
       <div
-        className="w-9 h-9 rounded-full"
+        className="h-9 w-9 rounded-full"
         style={{
           backgroundColor: animal.color,
         }}

@@ -2,7 +2,7 @@ export interface Animal {
   id: number;
   name: string;
   species: string;
-  size: "small" | "medium" | "large";
+  size: 'small' | 'medium' | 'large';
   prey: number[];
   predators: number[];
   color: string;
